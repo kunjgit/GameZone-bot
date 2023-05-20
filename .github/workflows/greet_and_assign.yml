@@ -15,21 +15,23 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const issueComment = `Hello there, thanks for creating this issue! use the command /assign and make sure you assign it to yourself `;
+            const issueComment = `Hello there, thanks for creating this issue!`;
+            const octokit = context.octokit;
             const payload = {
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: issueComment
             };
-            return github.issues.createComment(payload);
+            return octokit.issues.createComment(payload);
 
       - name: Check for "/assign" command
         id: check-command
         uses: actions/github-script@v5
         with:
           script: |
-            const { data: comments } = await github.issues.listComments({
+            const octokit = context.octokit;
+            const { data: comments } = await octokit.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number
@@ -49,6 +51,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const octokit = context.octokit;
             const payload = {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -56,7 +59,7 @@ jobs:
               assignees: [context.actor]
             };
 
-            await github.issues.addAssignees(payload);
+            await octokit.issues.addAssignees(payload);
 
             const labelPayload = {
               owner: context.repo.owner,
@@ -65,4 +68,4 @@ jobs:
               labels: ['GSSoC23']
             };
 
-            return github.issues.addLabels(labelPayload);
+            return octokit.issues.addLabels(labelPayload);
