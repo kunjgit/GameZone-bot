@@ -13,10 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: npm install @actions/github
+
       - name: Greet User
-        uses: peter-evans/create-issue-comment@v1
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: "Hello there, thanks for creating this issue!"
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          const { Octokit } = require("@octokit/rest");
+
+          const octokit = new Octokit({
+            auth: process.env.GITHUB_TOKEN,
+          });
+
+          const issueNumber = "${{ github.event.issue.number }}";
+          const commentBody = "Hello there, thanks for creating this issue!";
+
+          octokit.issues.createComment({
+            owner: "${{ github.repository_owner }}",
+            repo: "${{ github.repository }}",
+            issue_number: issueNumber,
+            body: commentBody,
+          });
