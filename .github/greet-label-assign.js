@@ -7,7 +7,7 @@ async function run() {
     });
 
     const greeting = 'Hello there, thanks for creating this issue!';
-    const { owner, repo, number } = process.env.GITHUB_CONTEXT;
+    const { owner, repo, number } = context.repo;
 
     await octokit.issues.createComment({
       owner,
@@ -17,13 +17,13 @@ async function run() {
     });
 
     const labelName = 'GSSoC23';
-    const { body } = await octokit.issues.get({
+    const { data: issue } = await octokit.issues.get({
       owner,
       repo,
       issue_number: number
     });
 
-    if (body.includes(labelName)) {
+    if (issue.body.includes(labelName)) {
       await octokit.issues.addLabels({
         owner,
         repo,
@@ -46,7 +46,7 @@ async function run() {
         owner,
         repo,
         issue_number: number,
-        assignees: [process.env.GITHUB_ACTOR]
+        assignees: [context.actor]
       });
     }
   } catch (error) {
