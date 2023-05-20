@@ -14,4 +14,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Greet User
-        run: echo "Hello there, thanks for creating this issue!"
+        uses: peter-evans/create-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: "Hello there, thanks for creating this issue!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
