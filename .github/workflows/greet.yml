@@ -1,0 +1,17 @@
+name: Greet on Issue Creation
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Greet User
+        run: echo "Hello there, thanks for creating this issue!"
