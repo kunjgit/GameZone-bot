@@ -34,7 +34,7 @@ jobs:
             echo "::set-output name=add_label::true"
           else
             echo "::set-output name=add_label::false"
-          }
+          fi
 
       - name: Add label "GSSoC23"
         if: ${{ steps.check_label.outputs.add_label == 'true' }}
