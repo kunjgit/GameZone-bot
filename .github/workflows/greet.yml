@@ -1,24 +1,13 @@
-name: Greet on Issue Creation
-
+name: Comment when opened
 on:
   issues:
     types:
       - opened
-
 jobs:
-  greet:
+  comment:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Run greet-label-assign.js
-        run: |
-          npm install @octokit/rest
-          node .github/greet-label-assign.js
+      - run: gh issue comment $ISSUE --body "Thank you for opening this issue!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
