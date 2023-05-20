@@ -11,75 +11,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install @octokit/rest
-
       - name: Greet with a comment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          const issueComment = 'Hello there, thanks for creating this issue!';
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit();
-
-          const payload = {
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: issueComment
-          };
-
-          octokit.issues.createComment(payload);
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const issueComment = 'Hello there, thanks for creating this issue!';
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: issueComment
+            });
 
       - name: Check for "/assign" command
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit();
+        id: check-command
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { data: comments } = await github.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
 
-          const { data: comments } = await octokit.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number
-          });
+            const lastComment = comments[comments.length - 1];
+            const assignCommand = '/assign';
 
-          const lastComment = comments[comments.length - 1];
-          const assignCommand = '/assign';
+            if (lastComment && lastComment.body.includes(assignCommand)) {
+              return { assign: true };
+            }
 
-          if (lastComment && lastComment.body.includes(assignCommand)) {
-            console.log('::set-output name=assign::true');
-          } else {
-            console.log('::set-output name=assign::false');
-          }
+            return { assign: false };
 
       - name: Assign issue and add label
         if: steps.check-command.outputs.assign == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit();
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: [context.actor]
+            });
 
-          const payload = {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            assignees: [context.actor]
-          };
-
-          await octokit.issues.addAssignees(payload);
-
-          const labelPayload = {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            labels: ['GSSoC23']
-          };
-
-          await octokit.issues.addLabels(labelPayload);
+            github.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['GSSoC23']
+            });
