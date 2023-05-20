@@ -13,23 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: npm install @actions/github
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
 
-      - name: Greet User
+      - name: Run greet-label-assign.js
         run: |
-          const { Octokit } = require("@octokit/rest");
-
-          const octokit = new Octokit({
-            auth: process.env.GITHUB_TOKEN,
-          });
-
-          const issueNumber = "${{ github.event.issue.number }}";
-          const commentBody = "Hello there, thanks for creating this issue!";
-
-          octokit.issues.createComment({
-            owner: "${{ github.repository_owner }}",
-            repo: "${{ github.repository }}",
-            issue_number: issueNumber,
-            body: commentBody,
-          });
+          npm install @octokit/rest
+          node .github/greet-label-assign.js
