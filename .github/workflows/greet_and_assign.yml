@@ -1,4 +1,4 @@
-name: Greet and Assign Issue
+name: Greet, Label, and Assign Issue
 
 on:
   issues:
@@ -7,7 +7,7 @@ on:
       - edited
 
 jobs:
-  greet-and-assign:
+  greet-label-assign:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,13 +15,29 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const issueComment = 'Hello there, thanks for creating this issue!';
+            const greeting = 'Hello there, thanks for creating this issue!';
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: issueComment
+              body: greeting
             });
+
+      - name: Add label if contains "GSSoC23"
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const labelName = 'GSSoC23';
+            const issueContent = context.payload.issue.body;
+
+            if (issueContent.includes(labelName)) {
+              github.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: [labelName]
+              });
+            }
 
       - name: Check for "/assign" command
         id: check-command
@@ -43,21 +59,14 @@ jobs:
 
             return { assign: false };
 
-      - name: Assign issue and add label
+      - name: Assign issue
         if: steps.check-command.outputs.assign == 'true'
         uses: actions/github-script@v4
         with:
           script: |
             github.issues.addAssignees({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
               assignees: [context.actor]
-            });
-
-            github.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels: ['GSSoC23']
             });
