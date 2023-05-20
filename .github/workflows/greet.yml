@@ -18,7 +18,7 @@ jobs:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
             const commentBody = "Thank you for opening this issue!";
-            const { owner, repo, number } = context.issue;
+            const { owner, repo, number, body } = context.issue;
 
             await github.issues.createComment({
               owner: owner,
@@ -30,9 +30,9 @@ jobs:
       - name: Add label if issue body contains "GSSoC23"
         id: check_label
         run: |
-          if (context.payload.issue.body.includes("GSSoC23")) {
+          if [[ $(echo "${{ github.event.issue.body }}" | grep -q "GSSoC23"; echo $?) == 0 ]]; then
             echo "::set-output name=add_label::true"
-          } else {
+          else
             echo "::set-output name=add_label::false"
           }
 
