@@ -7,7 +7,7 @@ async function run() {
     });
 
     const greeting = 'Hello there, thanks for creating this issue!';
-    const { owner, repo, number } = context.repo;
+    const { owner, repo, number } = process.env;
 
     await octokit.issues.createComment({
       owner,
@@ -46,7 +46,7 @@ async function run() {
         owner,
         repo,
         issue_number: number,
-        assignees: [context.actor]
+        assignees: [process.env.GITHUB_ACTOR]
       });
     }
   } catch (error) {
