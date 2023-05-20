@@ -24,6 +24,6 @@ jobs:
 
       - name: Run greet-label-assign script
         run: |
-          node greet-label-assign.js
+         node .github/greet-label-assign.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
