@@ -18,12 +18,12 @@ jobs:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
             const commentBody = "Thank you for opening this issue!";
-            const { issue } = context.payload;
+            const { owner, repo, number } = context.issue;
 
             await github.issues.createComment({
-              owner: issue.repository.owner.login,
-              repo: issue.repository.name,
-              issue_number: issue.number,
+              owner: owner,
+              repo: repo,
+              issue_number: number,
               body: commentBody
             });
 
@@ -42,11 +42,11 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
-            const { issue } = context.payload;
+            const { owner, repo, number } = context.issue;
 
             await github.issues.addLabels({
-              owner: issue.repository.owner.login,
-              repo: issue.repository.name,
-              issue_number: issue.number,
+              owner: owner,
+              repo: repo,
+              issue_number: number,
               labels: ["GSSoC23"]
             });
