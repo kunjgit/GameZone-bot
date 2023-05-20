@@ -11,61 +11,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Greet with a comment
-        uses: actions/github-script@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          script: |
-            const issueComment = `Hello there, thanks for creating this issue!`;
-            const octokit = context.octokit;
-            const payload = {
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: issueComment
-            };
-            return octokit.issues.createComment(payload);
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install @octokit/rest
+
+      - name: Greet with a comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          const issueComment = 'Hello there, thanks for creating this issue!';
+          const { Octokit } = require('@octokit/rest');
+          const octokit = new Octokit();
+
+          const payload = {
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: issueComment
+          };
+
+          octokit.issues.createComment(payload);
 
       - name: Check for "/assign" command
-        id: check-command
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const octokit = context.octokit;
-            const { data: comments } = await octokit.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          const { Octokit } = require('@octokit/rest');
+          const octokit = new Octokit();
 
-            const lastComment = comments[comments.length - 1];
-            const assignCommand = '/assign';
+          const { data: comments } = await octokit.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
 
-            if (lastComment && lastComment.body.includes(assignCommand)) {
-              return { assign: true };
-            }
+          const lastComment = comments[comments.length - 1];
+          const assignCommand = '/assign';
 
-            return { assign: false };
+          if (lastComment && lastComment.body.includes(assignCommand)) {
+            console.log('::set-output name=assign::true');
+          } else {
+            console.log('::set-output name=assign::false');
+          }
 
       - name: Assign issue and add label
         if: steps.check-command.outputs.assign == 'true'
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const octokit = context.octokit;
-            const payload = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              assignees: [context.actor]
-            };
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          const { Octokit } = require('@octokit/rest');
+          const octokit = new Octokit();
 
-            await octokit.issues.addAssignees(payload);
+          const payload = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            assignees: [context.actor]
+          };
 
-            const labelPayload = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels: ['GSSoC23']
-            };
+          await octokit.issues.addAssignees(payload);
 
-            return octokit.issues.addLabels(labelPayload);
+          const labelPayload = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: ['GSSoC23']
+          };
+
+          await octokit.issues.addLabels(labelPayload);
