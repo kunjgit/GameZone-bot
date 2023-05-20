@@ -7,12 +7,13 @@ async function run() {
     });
 
     const greeting = 'Hello there, thanks for creating this issue!';
-    const { owner, repo, number } = process.env;
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+    const issue_number = process.env.GITHUB_EVENT.issue.number;
 
     await octokit.issues.createComment({
       owner,
       repo,
-      issue_number: number,
+      issue_number,
       body: greeting
     });
 
@@ -20,14 +21,14 @@ async function run() {
     const { data: issue } = await octokit.issues.get({
       owner,
       repo,
-      issue_number: number
+      issue_number
     });
 
     if (issue.body.includes(labelName)) {
       await octokit.issues.addLabels({
         owner,
         repo,
-        issue_number: number,
+        issue_number,
         labels: [labelName]
       });
     }
@@ -35,7 +36,7 @@ async function run() {
     const { data: comments } = await octokit.issues.listComments({
       owner,
       repo,
-      issue_number: number
+      issue_number
     });
 
     const lastComment = comments[comments.length - 1];
@@ -45,7 +46,7 @@ async function run() {
       await octokit.issues.addAssignees({
         owner,
         repo,
-        issue_number: number,
+        issue_number,
         assignees: [process.env.GITHUB_ACTOR]
       });
     }
