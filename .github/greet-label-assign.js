@@ -1,4 +1,5 @@
 const { Octokit } = require('@octokit/rest');
+const fs = require('fs');
 
 async function run() {
   try {
@@ -7,13 +8,14 @@ async function run() {
     });
 
     const greeting = 'Hello there, thanks for creating this issue!';
-    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-    const issue_number = process.env.GITHUB_EVENT.issue.number;
+    const eventPath = process.env.GITHUB_EVENT_PATH;
+    const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+    const { owner, repo, number } = eventData.issue;
 
     await octokit.issues.createComment({
       owner,
       repo,
-      issue_number,
+      issue_number: number,
       body: greeting
     });
 
@@ -21,14 +23,14 @@ async function run() {
     const { data: issue } = await octokit.issues.get({
       owner,
       repo,
-      issue_number
+      issue_number: number
     });
 
     if (issue.body.includes(labelName)) {
       await octokit.issues.addLabels({
         owner,
         repo,
-        issue_number,
+        issue_number: number,
         labels: [labelName]
       });
     }
@@ -36,7 +38,7 @@ async function run() {
     const { data: comments } = await octokit.issues.listComments({
       owner,
       repo,
-      issue_number
+      issue_number: number
     });
 
     const lastComment = comments[comments.length - 1];
@@ -46,7 +48,7 @@ async function run() {
       await octokit.issues.addAssignees({
         owner,
         repo,
-        issue_number,
+        issue_number: number,
         assignees: [process.env.GITHUB_ACTOR]
       });
     }
