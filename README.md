@@ -1,1 +1,1 @@
-# simplifier-bot
+# Git Flow Atutomation bot 
