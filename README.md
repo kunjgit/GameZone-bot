@@ -1,1 +1,1 @@
-# Git Flow Atutomation bot 
+# Git Flow- The Workflow Automation bot 
