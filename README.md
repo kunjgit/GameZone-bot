@@ -1,5 +1,5 @@
-# Git Flow- The Workflow Automation bot 
-![gitflow](https://github.com/kunjgit/GitFlow/assets/103763618/45711c32-1ecc-42af-96f0-e88a193e2112)
+![gitflow](https://github.com/kunjgit/GitFlow/assets/103763618/354d0397-ba33-478a-b1be-851b7219af65)
+
 
 ## Introduction 🌟
 GitFlow is a Python-based automation bot designed to streamline repository management on GitHub. This bot automates the handling of issues and pull requests (PRs), ensuring a smoother review process and efficient project maintenance.
